@@ -3,7 +3,7 @@ This Source Code Form is subject to the terms of the Mozilla Public
 License, v. 2.0. If a copy of the MPL was not distributed with this
 file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-Copied verbatim from https://github.com/tgstation/gbp-action/blob/eeead96cb1f16f23dbe103274b652aedbef017f1/src/configuration.ts
+Copied from https://github.com/tgstation/gbp-action/blob/eeead96cb1f16f23dbe103274b652aedbef017f1/src/configuration.ts with modifications.
 """
 
 import { promises as fs } from "fs"
@@ -11,8 +11,6 @@ import { isRight } from "fp-ts/lib/Either"
 import * as t from "io-ts"
 import * as toml from "toml"
 import path from "path"
-
-const CONFIG_FILE = "./.github/gbp.toml"
 
 export type Configuration = {
     collection_method?: "high_vs_low" | "sum"
@@ -56,17 +54,4 @@ export function parseConfig(configurationText: string): Configuration {
     } else {
         throw valueEither.left
     }
-}
-
-export async function readConfiguration(
-    basePath?: string,
-): Promise<Configuration> {
-    const configFile = await fs.readFile(
-        basePath ? path.join(basePath, CONFIG_FILE) : CONFIG_FILE,
-        {
-            encoding: "utf-8",
-        },
-    )
-
-    return parseConfig(configFile)
 }
