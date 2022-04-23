@@ -1,5 +1,6 @@
 import requests
 import os.path
+from .gbp_config import parseConfig, Configuration
 
 from redbot.core import commands, utils, Config
 
@@ -55,10 +56,20 @@ class gbp(BaseCog):
             final_dict[i] = (pair[1], pair[0])
             i += 1
         await self.config.gbp.set(final_dict)
+    
+    async def get_gbp_labels(self):
+        response = requests.get(
+            url="https://raw.githubusercontent.com/tgstation/tgstation/gbp-balances/.github/gbp.toml"
+            )
+        content = response.text
+
+        config_values = parseConfig(content)
+        await self.config.labels.set(config_values)
 
     @commands.command()
     async def fetchgbp(self, ctx):
         await self.get_latest_gbp()
+        await self.get_gbp_labels()
         await ctx.send("Fetched latest GBP!")
 
     @commands.command()
@@ -110,6 +121,21 @@ class gbp(BaseCog):
                 break
             msg += "#" + str(i) + ": " + gbp_dict[str(i)][0] + " (" + str(gbp_dict[str(i)][1]) + " GBP)\n"
         if (msg == ""):
+            await ctx.send("An error has occured!")
+            return
+        if (len(msg) >= 2000):
+            await ctx.send(file=utils.chat_formatting.text_to_file(msg, "gbp.txt"))
+        else:
+            await ctx.send(f"```{msg}```")
+    
+    @commands.command()
+    async def gbplabels(self, ctx):
+        msg = ""
+        labels = await self.config.labels()
+        label_points = labels.points
+        for (label, points) in label_points:
+            msg += f"{label} = {points}\n"
+        if (msg == "")
             await ctx.send("An error has occured!")
             return
         if (len(msg) >= 2000):
